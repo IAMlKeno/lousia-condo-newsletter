@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "tinacms dev -c \"next dev --turbopack\"",
-    "build": "tinacms build && next build",
+    "build": "tinacms build && next build && bun run scripts/send-newsletters.ts",
     "build-local": "tinacms build --content=local --skip-cloud-checks -c \"next build\"",
     "start": "tinacms build && next start",
     "export": "npm run build && next export",
     "lint": "biome lint",
-    "dev:build": "next build"
+    "dev:build": "next build",
+    "send-newsletters": "bun run scripts/send-newsletters.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -29,11 +30,13 @@
     "@headlessui/react": "^2.2.9",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/supabase-js": "^2.45.0",
     "@tailwindcss/postcss": "^4.1.15",
     "@tailwindcss/typography": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.484.0",
     "mermaid": "^11.12.0",
     "motion": "^12.23.24",

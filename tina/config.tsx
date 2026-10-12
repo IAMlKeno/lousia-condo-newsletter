@@ -1,7 +1,8 @@
 import { defineConfig } from "tinacms";
 import nextConfig from '../next.config'
 
-import Post from "./collection/post";
+import Newsletter from "./collection/newsletter";
+import Comment from "./collection/comment";
 import Global from "./collection/global";
 import Author from "./collection/author";
 import Page from "./collection/page";
@@ -32,7 +33,7 @@ const config = defineConfig({
     basePath: nextConfig.basePath?.replace(/^\//, '') || '', // The base path of the app (could be /blog)
   },
   schema: {
-    collections: [Page, Post, Author, Tag, Global],
+    collections: [Page, Newsletter, Comment, Author, Tag, Global],
   },
 });
 

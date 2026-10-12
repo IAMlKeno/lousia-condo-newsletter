@@ -121,3 +121,64 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ---- Newsletter: newspaper theme ---- */
+.newspaper {
+  font-family: var(--font-lato), ui-serif, Georgia, serif;
+}
+.newspaper .font-serif {
+  font-family: var(--font-playfair), ui-serif, Georgia, serif;
+}
+.newspaper-sheet {
+  background: #fffdf7;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.newspaper-body p + p {
+  margin-top: 0.6em;
+}
+
+/* ---- Print: one formatted page ---- */
+@page {
+  size: letter;
+  margin: 0.5in;
+}
+@media print {
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    padding-top: 0 !important;
+  }
+  .newspaper {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  .newspaper-sheet {
+    background: #fff !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    font-size: 9.5pt;
+    line-height: 1.35;
+    max-height: 10in;
+    overflow: hidden;
+  }
+  .newspaper-sheet h1 {
+    font-size: 26pt !important;
+  }
+  .newspaper-sheet h2 {
+    font-size: 18pt !important;
+  }
+  .newspaper-sheet h3 {
+    font-size: 11pt !important;
+  }
+  .newspaper-body {
+    font-size: 9pt !important;
+  }
+  .newspaper-sheet section {
+    break-inside: avoid;
+  }
+}
