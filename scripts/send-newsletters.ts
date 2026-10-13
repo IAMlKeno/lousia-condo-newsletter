@@ -9,6 +9,14 @@ import { siteUrl } from '../lib/server/config';
 import { getSupabase } from '../lib/server/supabase';
 
 async function main() {
+  // Only the live production deploy sends email. Deploy previews, branch
+  // deploys and local builds skip it, unless SEND_NEWSLETTERS=true is set.
+  const context = process.env.CONTEXT; // set by Netlify
+  if (context !== 'production' && process.env.SEND_NEWSLETTERS !== 'true') {
+    console.log(`[newsletter] Skipping email (build context: ${context ?? 'local'}).`);
+    return;
+  }
+
   const dir = path.join(process.cwd(), 'content', 'newsletters');
   const files = (await readdir(dir)).filter((file) => file.endsWith('.mdx'));
   const supabase = getSupabase();

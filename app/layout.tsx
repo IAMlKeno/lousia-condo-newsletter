@@ -1,21 +1,16 @@
 import React from "react";
 import { Metadata } from "next";
-import { Inter as FontSans, Lato, Nunito, Playfair_Display } from "next/font/google";
+import { Inter as FontSans, Playfair_Display, Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { NEWSPAPER_NAME } from "@/lib/newsletter";
 import { VideoDialogProvider } from "@/components/ui/VideoDialogContext";
 import VideoDialog from "@/components/ui/VideoDialog";
 
 import "@/styles.css";
-import { TailwindIndicator } from "@/components/ui/breakpoint-indicator";
 
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
-});
-
-const nunito = Nunito({
-  subsets: ["latin"],
-  variable: "--font-nunito",
 });
 
 const playfair = Playfair_Display({
@@ -23,15 +18,18 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
 });
 
-const lato = Lato({
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  variable: "--font-lato",
-  weight: "400",
+  variable: "--font-serif",
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
-  title: "Tina",
-  description: "Tina Cloud Starter",
+  title: {
+    default: NEWSPAPER_NAME,
+    template: `%s · ${NEWSPAPER_NAME}`,
+  },
+  description: "News and decisions from the Board of Directors, for the owners of Louisa Condominium.",
 };
 
 export default function RootLayout({
@@ -40,13 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn(fontSans.variable, nunito.variable, lato.variable, playfair.variable)}>
-      <body className="min-h-screen bg-background font-sans antialiased">
+    <html lang="en" className={cn(fontSans.variable, playfair.variable, sourceSerif.variable)}>
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+        {/* Kept for the optional video section on Pages */}
         <VideoDialogProvider>
           {children}
           <VideoDialog />
         </VideoDialogProvider>
-        <TailwindIndicator />
       </body>
     </html>
   );

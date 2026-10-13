@@ -1,24 +1,28 @@
 'use client';
-import React, { useState } from 'react';
-import { COMMENT_WORD_LIMIT, countWords } from '@/lib/newsletter';
+import React, { useId, useState } from 'react';
+import { countWords } from '@/lib/newsletter';
 
 type Props = {
   issueSlug: string;
   decisionTitle: string;
+  wordLimit: number;
 };
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
-export default function CommentForm({ issueSlug, decisionTitle }: Props) {
+export default function CommentForm({ issueSlug, decisionTitle, wordLimit }: Props) {
+  const id = useId();
+  const [open, setOpen] = useState(false);
   const [comment, setComment] = useState('');
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
+  const [website, setWebsite] = useState(''); // honeypot, hidden from people
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
 
   const words = countWords(comment);
-  const overLimit = words > COMMENT_WORD_LIMIT;
-  const canSubmit = words > 0 && !overLimit && status !== 'sending';
+  const overLimit = words > wordLimit;
+  const canSubmit = words > 0 && !overLimit && name.trim() && unit.trim() && status !== 'sending';
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,73 +34,114 @@ export default function CommentForm({ issueSlug, decisionTitle }: Props) {
       const response = await fetch('/.netlify/functions/submit-comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ issueSlug, decisionTitle, name, unit, comment }),
+        body: JSON.stringify({ issueSlug, decisionTitle, name, unit, comment, website }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(result.error || 'Your comment could not be sent.');
+        throw new Error(result.error || 'Your comment could not be sent. Please try again.');
       }
       setStatus('sent');
       setComment('');
-      setMessage('Thank you. Your comment has been received.');
+      setMessage(result.message || 'Thank you. Your comment was received.');
     } catch (error) {
       setStatus('error');
-      setMessage(error instanceof Error ? error.message : 'Your comment could not be sent.');
+      setMessage(error instanceof Error ? error.message : 'Your comment could not be sent. Please try again.');
     }
   }
 
   if (status === 'sent') {
-    return <p className="mt-4 text-sm italic text-stone-700">{message}</p>;
+    return (
+      <p className="no-print font-body mt-4 border-t border-[var(--rule)] pt-3 text-sm italic text-[var(--ink-soft)]" role="status">
+        {message}
+      </p>
+    );
+  }
+
+  if (!open) {
+    return (
+      <div className="no-print mt-4">
+        <button type="button" onClick={() => setOpen(true)} className="btn-outline">
+          Share your feedback
+        </button>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="no-print mt-4 border-t border-stone-400 pt-4">
-      <p className="mb-2 font-serif text-sm font-semibold uppercase tracking-wide text-stone-800">
-        Owner feedback
-      </p>
-      <label className="block text-sm text-stone-700" htmlFor={`comment-${issueSlug}-${decisionTitle}`}>
-        Your comment
-      </label>
-      <textarea
-        id={`comment-${issueSlug}-${decisionTitle}`}
-        value={comment}
-        onChange={(event) => setComment(event.target.value)}
-        rows={4}
-        className="mt-1 w-full rounded-sm border border-stone-400 bg-white p-2 text-sm focus:border-stone-800 focus:outline-none"
-        required
+    <form onSubmit={handleSubmit} className="no-print mt-4 space-y-3 border-t border-[var(--rule)] pt-4">
+      <div>
+        <label className="font-meta block text-xs font-medium uppercase tracking-[0.1em] text-[var(--ink-soft)]" htmlFor={`${id}-comment`}>
+          Your comment
+        </label>
+        <textarea
+          id={`${id}-comment`}
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+          rows={5}
+          className="field mt-1 resize-y"
+          aria-describedby={`${id}-count`}
+          required
+        />
+        <p id={`${id}-count`} className={`font-meta mt-1 text-xs ${overLimit ? 'text-red-700' : 'text-[var(--ink-muted)]'}`}>
+          {words} / {wordLimit} words{overLimit ? ' — please shorten your comment' : ''}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-[1fr_6.5rem] gap-2">
+        <div>
+          <label className="sr-only" htmlFor={`${id}-name`}>Name</label>
+          <input
+            id={`${id}-name`}
+            type="text"
+            placeholder="Your name"
+            autoComplete="name"
+            required
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="field"
+          />
+        </div>
+        <div>
+          <label className="sr-only" htmlFor={`${id}-unit`}>Unit number</label>
+          <input
+            id={`${id}-unit`}
+            type="text"
+            placeholder="Unit #"
+            required
+            value={unit}
+            onChange={(event) => setUnit(event.target.value)}
+            className="field"
+          />
+        </div>
+      </div>
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={website}
+        onChange={(event) => setWebsite(event.target.value)}
+        className="hidden"
       />
-      <div className="mt-1 flex justify-between text-xs">
-        <span className={overLimit ? 'text-red-700' : 'text-stone-600'}>
-          {words} / {COMMENT_WORD_LIMIT} words
-        </span>
-        {overLimit && <span className="text-red-700">Please shorten your comment.</span>}
-      </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <input
-          type="text"
-          placeholder="Name (optional)"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          className="rounded-sm border border-stone-400 bg-white p-2 text-sm"
-        />
-        <input
-          type="text"
-          placeholder="Unit (optional)"
-          value={unit}
-          onChange={(event) => setUnit(event.target.value)}
-          className="rounded-sm border border-stone-400 bg-white p-2 text-sm"
-        />
-      </div>
+      <p className="font-meta text-xs text-[var(--ink-muted)]">
+        Comments are reviewed by the board before they appear here. Your name and unit number are shown with your comment.
+      </p>
 
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className="mt-3 rounded-sm bg-stone-900 px-4 py-2 text-sm font-medium text-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {status === 'sending' ? 'Sending…' : 'Submit comment'}
-      </button>
-      {status === 'error' && <p className="mt-2 text-sm text-red-700">{message}</p>}
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={!canSubmit} className="btn-ink">
+          {status === 'sending' ? 'Sending…' : 'Submit comment'}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="font-meta text-xs text-[var(--ink-muted)] underline underline-offset-2">
+          Cancel
+        </button>
+      </div>
+      {status === 'error' && (
+        <p className="text-sm text-red-700" role="alert">
+          {message}
+        </p>
+      )}
     </form>
   );
 }

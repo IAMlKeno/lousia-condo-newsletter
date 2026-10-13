@@ -9,17 +9,14 @@ import { statsBlockSchema } from '@/components/blocks/stats';
 import { ctaBlockSchema } from '@/components/blocks/call-to-action';
 
 const Page: Collection = {
-  label: 'Pages',
+  label: 'Pages (About, etc.)',
   name: 'page',
   path: 'content/pages',
   format: 'mdx',
   ui: {
     router: ({ document }) => {
-      const filepath = document._sys.breadcrumbs.join('/');
-      if (filepath === 'home') {
-        return '/';
-      }
-      return `/${filepath}`;
+      // The home page shows the latest newsletter issue, so pages live at /<name>.
+      return `/${document._sys.breadcrumbs.join('/')}`;
     },
   },
   fields: [

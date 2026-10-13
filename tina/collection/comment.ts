@@ -1,13 +1,27 @@
 import type { Collection } from 'tinacms';
 
 // Owner comments submitted through /.netlify/functions/submit-comment.
-// They are not shown on the public site; admins review them here.
+// New comments arrive as "Pending review". Set a comment to "Approved" to show
+// it publicly under its decision; "Hidden" keeps it for the board's records only.
 const Comment: Collection = {
   label: 'Owner Comments',
   name: 'comment',
   path: 'content/comments',
   format: 'json',
+  ui: {
+    allowedActions: { create: false },
+  },
   fields: [
+    {
+      type: 'string',
+      name: 'status',
+      label: 'Status',
+      options: [
+        { label: 'Pending review', value: 'new' },
+        { label: 'Approved (shown publicly)', value: 'approved' },
+        { label: 'Hidden', value: 'hidden' },
+      ],
+    },
     {
       type: 'string',
       name: 'decisionTitle',
@@ -30,12 +44,12 @@ const Comment: Collection = {
     {
       type: 'string',
       name: 'name',
-      label: 'Name (optional)',
+      label: 'Name',
     },
     {
       type: 'string',
       name: 'unit',
-      label: 'Unit (optional)',
+      label: 'Unit',
     },
     {
       type: 'datetime',
@@ -48,13 +62,10 @@ const Comment: Collection = {
     },
     {
       type: 'string',
-      name: 'status',
-      label: 'Status',
-      options: [
-        { label: 'New', value: 'new' },
-        { label: 'Reviewed', value: 'reviewed' },
-        { label: 'Resolved', value: 'resolved' },
-      ],
+      name: 'boardReply',
+      label: 'Board reply (optional)',
+      description: 'Shown under the comment once it is approved.',
+      ui: { component: 'textarea' },
     },
   ],
 };

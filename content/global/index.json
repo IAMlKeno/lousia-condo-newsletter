@@ -1,54 +1,32 @@
 {
   "header": {
     "icon": {
-      "name": "Tina",
-      "color": "orange",
-      "style": "float"
+      "name": "BiNews",
+      "color": "default",
+      "style": "regular"
     },
-    "name": "Tina Starter",
+    "name": "Louisa Condominium Newsletter",
+    "tagline": "News and decisions from the Board of Directors",
     "color": "default",
     "nav": [
       {
         "href": "/",
-        "label": "Home"
+        "label": "Latest issue"
+      },
+      {
+        "href": "/issues",
+        "label": "Archive"
       },
       {
         "href": "/about",
         "label": "About"
-      },
-      {
-        "href": "/issues",
-        "label": "Issues"
       }
     ]
   },
   "footer": {
-    "social": [
-      {
-        "icon": {
-          "name": "FaLinkedin"
-        },
-        "url": "https://www.linkedin.com/company/tinacms"
-      },
-      {
-        "icon": {
-          "name": "FaGithub"
-        },
-        "url": "https://github.com/tinacms/tinacms"
-      },
-      {
-        "icon": {
-          "name": "FaYoutube"
-        },
-        "url": "https://www.youtube.com/@TinaCMS"
-      },
-      {
-        "icon": {
-          "name": "FaXTwitter"
-        },
-        "url": "https://x.com/TinaCMS"
-      }
-    ]
+    "contactEmail": "",
+    "note": "Published by the Board of Directors of Louisa Condominium for its owners.",
+    "social": []
   },
   "theme": {
     "color": "blue",

@@ -1,0 +1,10 @@
+{
+  "status": "approved",
+  "issueSlug": "2026-10-sample-fall-board-update",
+  "decisionTitle": "Should we add covered bike storage?",
+  "name": "Sample Owner",
+  "unit": "000",
+  "comment": "SAMPLE COMMENT. This shows how an approved comment looks. Delete it in the admin under Owner Comments.",
+  "submittedAt": "2026-10-12T15:00:00.000Z",
+  "boardReply": "Thanks, we'll share survey results in the next issue."
+}

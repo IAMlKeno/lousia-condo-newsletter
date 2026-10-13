@@ -2,6 +2,7 @@ import { NEWSPAPER_NAME } from '../newsletter';
 
 export type IssueFrontmatter = {
   title: string;
+  edition?: string;
   issueDate?: string | Date;
   summary?: string;
   updates?: { headline?: string }[];
@@ -51,7 +52,7 @@ export function issueEmail({
   unsubscribeUrl: string;
 }) {
   const subject = `${NEWSPAPER_NAME}: ${issue.title}`;
-  const dateLabel = formatDate(issue.issueDate);
+  const dateLabel = [issue.edition, formatDate(issue.issueDate)].filter(Boolean).join(' · ');
   const updates = (issue.updates ?? []).map((u) => u.headline).filter(Boolean) as string[];
   const decisions = (issue.decisions ?? [])
     .filter((d) => d.title)
@@ -88,5 +89,32 @@ export function issueEmail({
       <p style="font-size: 12px; color: #57534e;"><a href="${escapeHtml(unsubscribeUrl)}" style="color: #57534e;">Unsubscribe</a></p>
     </div>`;
 
+  return { subject, text, html };
+}
+
+export function commentNotificationEmail(record: {
+  issueSlug: string;
+  decisionTitle: string;
+  name: string;
+  unit: string;
+  comment: string;
+}) {
+  const adminUrl = `${(process.env.SITE_URL ?? '').replace(/\/$/, '')}/admin/index.html#/collections/comment`;
+  const subject = `New owner comment: ${record.decisionTitle}`;
+  const text = [
+    `${record.name} (unit ${record.unit}) commented on "${record.decisionTitle}" in issue ${record.issueSlug}:`,
+    '',
+    record.comment,
+    '',
+    `Review and approve it under Owner Comments: ${adminUrl}`,
+  ].join('\n');
+  const html = `
+    <div style="font-family: Georgia, serif; color: #1c1917; max-width: 560px; margin: 0 auto; padding: 24px;">
+      <p style="font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: #57534e; margin: 0;">New owner comment · pending review</p>
+      <h1 style="font-size: 20px; margin: 8px 0 12px;">${escapeHtml(record.decisionTitle)}</h1>
+      <p style="margin: 0 0 8px;"><strong>${escapeHtml(record.name)}</strong>, unit ${escapeHtml(record.unit)}</p>
+      <blockquote style="border-left: 3px solid #7a1f1f; margin: 0; padding: 4px 12px; white-space: pre-wrap;">${escapeHtml(record.comment)}</blockquote>
+      <p style="margin-top: 20px;"><a href="${escapeHtml(adminUrl)}" style="display: inline-block; background: #1c1917; color: #fffdf7; padding: 10px 18px; text-decoration: none;">Review in the admin</a></p>
+    </div>`;
   return { subject, text, html };
 }

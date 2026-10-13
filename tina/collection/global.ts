@@ -1,7 +1,6 @@
 import type { Collection } from "tinacms";
 import { ColorPickerInput } from "../fields/color";
 import { iconSchema } from "../fields/icon";
-import { icon } from "mermaid/dist/rendering-util/rendering-elements/shapes/icon.js";
 
 const Global: Collection = {
   label: "Global",
@@ -20,8 +19,15 @@ const Global: Collection = {
         iconSchema as any,
         {
           type: "string",
-          label: "Name",
+          label: "Newsletter name",
           name: "name",
+          description: "Shown in the masthead and the top bar.",
+        },
+        {
+          type: "string",
+          label: "Tagline",
+          name: "tagline",
+          description: "Short line under the masthead, e.g. \"News from the Board of Directors\".",
         },
         {
           type: "string",
@@ -66,6 +72,17 @@ const Global: Collection = {
       label: "Footer",
       name: "footer",
       fields: [
+        {
+          type: "string",
+          label: "Board contact email",
+          name: "contactEmail",
+        },
+        {
+          type: "string",
+          label: "Footer note",
+          name: "note",
+          ui: { component: "textarea" },
+        },
         {
           type: "object",
           label: "Social Links",

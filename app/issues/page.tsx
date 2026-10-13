@@ -1,12 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import client from '@/tina/__generated__/client';
 import Layout from '@/components/layout/layout';
-import { NEWSPAPER_NAME } from '@/lib/newsletter';
-import SubscribeForm from '@/components/newsletter/subscribe-form';
+import { getPublishedIssues } from '@/lib/issues';
+import { formatLongDate } from '@/lib/newsletter';
 
 export const revalidate = 300;
+
+export const metadata: Metadata = { title: 'All issues' };
 
 const NOTICES: Record<string, string> = {
   'subscription=confirmed': 'Thank you. Your subscription is confirmed.',
@@ -26,44 +27,51 @@ export default async function IssuesIndex({
     (params.unsubscribed && NOTICES[`unsubscribed=${params.unsubscribed}`]) ||
     '';
 
-  const connection = await client.queries.newsletterConnection();
-  const issues = (connection.data.newsletterConnection.edges ?? [])
-    .map((edge) => edge?.node)
-    .filter((node) => node?.published)
-    .sort((a, b) => new Date(b!.issueDate!).getTime() - new Date(a!.issueDate!).getTime());
+  const issues = await getPublishedIssues();
 
   return (
-    <Layout rawPageData={connection.data}>
-      <section className="newspaper mx-auto max-w-3xl px-6 pb-16 pt-8">
-        <h1 className="border-b-4 border-double border-stone-800 pb-3 text-center font-serif text-4xl font-bold text-stone-900">
-          {NEWSPAPER_NAME}
+    <Layout>
+      <section className="mx-auto max-w-3xl px-4 pb-8 pt-10 sm:px-6">
+        <p className="kicker text-center">The archive</p>
+        <h1 className="font-display mt-2 border-b-[3px] border-double border-[var(--ink)] pb-4 text-center text-4xl font-bold sm:text-5xl">
+          All issues
         </h1>
-        {notice && <p className="no-print mt-4 text-center font-serif italic text-stone-800">{notice}</p>}
-        <ul className="mt-8 divide-y divide-stone-300">
-          {issues.map((issue) => {
-            const date = new Date(issue!.issueDate!);
+        {notice && (
+          <p className="font-body mt-6 border border-[var(--rule)] bg-[var(--paper)] px-4 py-3 text-center italic" role="status">
+            {notice}
+          </p>
+        )}
+        <ul className="mt-4 divide-y divide-[var(--rule)]">
+          {issues.map((issue, index) => {
+            const decisions = (issue.decisions ?? []).filter(Boolean).length;
             return (
-              <li key={issue!._sys.relativePath} className="py-5">
-                <p className="font-serif text-xs uppercase tracking-wide text-stone-600">
-                  {!isNaN(date.getTime()) ? format(date, 'MMMM d, yyyy') : ''}
-                </p>
-                <Link
-                  href={`/issues/${issue!._sys.breadcrumbs.join('/')}`}
-                  className="mt-1 block font-serif text-2xl font-bold text-stone-900 hover:underline"
-                >
-                  {issue!.title}
-                </Link>
-                {issue!.summary && (
-                  <p className="mt-2 font-serif text-stone-700">{issue!.summary}</p>
-                )}
+              <li key={issue._sys.relativePath} className="grid gap-1 py-6 sm:grid-cols-[9rem_1fr] sm:gap-6">
+                <div className="font-meta text-xs uppercase tracking-[0.12em] text-[var(--ink-muted)] sm:pt-2">
+                  <p>{formatLongDate(issue.issueDate)}</p>
+                  {issue.edition && <p className="mt-0.5">{issue.edition}</p>}
+                  {index === 0 && <p className="mt-1 text-[var(--accent)]">Latest</p>}
+                </div>
+                <div>
+                  <Link
+                    href={`/issues/${issue._sys.breadcrumbs.join('/')}`}
+                    className="font-display text-2xl font-bold leading-snug hover:underline hover:decoration-[var(--accent)] hover:underline-offset-4"
+                  >
+                    {issue.title}
+                  </Link>
+                  {issue.summary && <p className="font-body mt-1.5 text-[var(--ink-soft)]">{issue.summary}</p>}
+                  {decisions > 0 && (
+                    <p className="font-meta mt-2 text-xs text-[var(--accent)]">
+                      {decisions} {decisions === 1 ? 'item' : 'items'} for owner input
+                    </p>
+                  )}
+                </div>
               </li>
             );
           })}
         </ul>
         {issues.length === 0 && (
-          <p className="mt-8 text-center font-serif italic text-stone-600">No issues have been published yet.</p>
+          <p className="font-body mt-8 text-center italic text-[var(--ink-muted)]">No issues have been published yet.</p>
         )}
-        <SubscribeForm />
       </section>
     </Layout>
   );
